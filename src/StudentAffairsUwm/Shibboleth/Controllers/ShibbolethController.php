@@ -120,7 +120,7 @@ class ShibbolethController extends Controller
             return abort(403, 'Unauthorized');
         }
 
-        if (!config('shibboleth.use_simple_session', false) && $entitlementString) {
+        if (!config('shibboleth.use_simple_session', false) && !empty($entitlementString)) {
             $entitlements = Entitlement::findInString($entitlementString);
             $user->entitlements()->sync($entitlements);
         }
