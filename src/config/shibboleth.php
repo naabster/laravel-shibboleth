@@ -84,6 +84,7 @@ return array(
      */
 
     'use_simple_session' => false, // Just add Shibboleth Response to Laravel Session instead of Laravel Auth with User Model
+    'identifier' => 'email', // Check against this Shibboleth var for valid user. For example 'email' or 'sn'
 
     /*
     |--------------------------------------------------------------------------

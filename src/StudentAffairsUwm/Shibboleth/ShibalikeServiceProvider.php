@@ -19,6 +19,8 @@ class ShibalikeServiceProvider extends ServiceProvider
             __DIR__ . '/../../resources/views/Shibalike/' => resource_path('views/vendor/shibalike'),
         ]);
 
-        $this->loadRoutesFrom(__DIR__ . '/../../routes/shibalike.php');
+        if (config('shibboleth.emulate_idp')) {
+            $this->loadRoutesFrom(__DIR__ . '/../../routes/shibalike.php');
+        }
     }
 }
