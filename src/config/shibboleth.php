@@ -76,6 +76,17 @@ return array(
 
     /*
     |--------------------------------------------------------------------------
+    | Auth Settings
+    |--------------------------------------------------------------------------
+    |
+    | Allows you to change the auth method
+    |
+     */
+
+    'use_simple_session' => false, // Just add Shibboleth Response to Laravel Session instead of Laravel Auth with User Model
+
+    /*
+    |--------------------------------------------------------------------------
     | User Creation and Groups Settings
     |--------------------------------------------------------------------------
     |

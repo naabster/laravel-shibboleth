@@ -91,11 +91,19 @@ class ShibbolethController extends Controller
             return abort(403, 'Unauthorized');
         }
 
-        $userClass  = config('auth.providers.users.model', 'App\User');
+        $entitlementString = $this->getServerVariable(config('shibboleth.entitlement'));
+
+        $userClass = config('auth.providers.users.model', 'App\User');
+
+        // Dont use Auth, just add $map to Session
+        if (config('shibboleth.use_simple_session', false)) {
+            $map[config('shibboleth.entitlement')] = $entitlementString;
+            session(['shibboleth' => $map]);
+        }
 
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
-        if (Auth::attempt(array('email' => $map['email']), true)) {
+        elseif (Auth::attempt(array('email' => $map['email']), true)) {
             $user = $userClass::where('email', '=', $map['email'])->first();
 
             // Update the model as necessary
@@ -112,13 +120,12 @@ class ShibbolethController extends Controller
             return abort(403, 'Unauthorized');
         }
 
-        Session::regenerate();
-
-        $entitlementString = $this->getServerVariable(config('shibboleth.entitlement'));
-        if ($entitlementString) {
+        if (!config('shibboleth.use_simple_session', false) && $entitlementString) {
             $entitlements = Entitlement::findInString($entitlementString);
             $user->entitlements()->sync($entitlements);
         }
+
+        Session::regenerate();
 
         $route = config('shibboleth.authenticated');
 
