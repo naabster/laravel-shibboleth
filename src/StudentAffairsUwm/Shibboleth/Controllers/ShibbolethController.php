@@ -63,12 +63,14 @@ class ShibbolethController extends Controller
      */
     public function login()
     {
+        $isPassive = (config('shibboleth.isPassive') === true) ? 'isPassive=true&' : '';
+
         if (config('shibboleth.emulate_idp') === true) {
             return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
-                . '?target=' .  action('\\' . __CLASS__ . '@idpAuthenticate'));
+                . '?' . $isPassive . 'target=' .  action('\\' . __CLASS__ . '@idpAuthenticate'));
         }
 
-        return Redirect::to(config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthenticate'));
+        return Redirect::to(config('shibboleth.idp_login') . '?' . $isPassive . 'target=' . action('\\' . __CLASS__ . '@idpAuthenticate'));
     }
 
     /**

@@ -15,6 +15,7 @@ return array(
     'idp_login'     => '/Shibboleth.sso/Login',
     'idp_logout'    => '/Shibboleth.sso/Logout',
     'authenticated' => '/home',
+    'isPassive'     => false,
 
     /*
     |--------------------------------------------------------------------------
