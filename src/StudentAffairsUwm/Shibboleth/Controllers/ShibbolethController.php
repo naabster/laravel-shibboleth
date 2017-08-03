@@ -141,6 +141,29 @@ class ShibbolethController extends Controller
      */
     public function destroy()
     {
+        $this->destroySession();
+
+        if (config('shibboleth.emulate_idp') == true) {
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogout'));
+        }
+
+        return Redirect::to(config('shibboleth.idp_logout'));
+    }
+
+    /**
+     * Destroy the current session and log the user out
+     */
+    public function singleLogout()
+    {
+        $this->destroySession();
+
+        return 'log out successful';
+    }
+
+    /**
+     * Destroy current Session
+     */
+    private function destroySession() {
         Auth::logout();
         Session::flush();
 
@@ -148,12 +171,6 @@ class ShibbolethController extends Controller
             $token = JWTAuth::parseToken();
             $token->invalidate();
         }
-
-        if (config('shibboleth.emulate_idp') == true) {
-            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogout'));
-        }
-
-        return Redirect::to(config('shibboleth.idp_logout'));
     }
 
     /**
