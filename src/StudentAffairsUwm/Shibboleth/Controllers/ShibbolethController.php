@@ -157,7 +157,8 @@ class ShibbolethController extends Controller
     {
         $this->destroySession();
 
-        return 'log out successful';
+        $target = (Input::get('return') != null) ? Input::get('return') : $this->getServerVariable('HTTP_REFERER');
+        return Redirect::to($target);
     }
 
     /**
