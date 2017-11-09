@@ -127,13 +127,14 @@ class ShibbolethController extends Controller
 
         Session::regenerate();
 
-        $route = config('shibboleth.authenticated');
+        $route = session('triedShibLogin', config('shibboleth.authenticated'));
+        Session::forget('triedShibLogin');
 
         if (config('jwtauth') === true) {
             $route .= $this->tokenizeRedirect($user, ['auth_type' => 'idp']);
         }
 
-        return redirect()->intended($route);
+        return redirect($route);
     }
 
     /**
