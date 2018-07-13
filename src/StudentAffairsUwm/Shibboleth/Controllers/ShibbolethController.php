@@ -114,21 +114,24 @@ class ShibbolethController extends Controller
         elseif (config('shibboleth.add_new_users', true)) {
             $map['password'] = 'shibboleth';
             $user = $userClass::create($map);
+            Auth::login($user, true);
         }
 
         else {
             return abort(403, 'Unauthorized');
         }
 
-        if (!config('shibboleth.use_simple_session', false) && !empty($entitlementString)) {
-            $entitlements = Entitlement::findInString($entitlementString);
-            $user->entitlements()->sync($entitlements);
-        }
+//        if (!config('shibboleth.use_simple_session', false) && !empty($entitlementString)) {
+//            $entitlements = Entitlement::findInString($entitlementString);
+//            $user->entitlements()->sync($entitlements);
+//        }
 
         Session::regenerate();
 
         $route = session('triedShibLogin', config('shibboleth.authenticated'));
         Session::forget('triedShibLogin');
+
+        $route = $route == route('shibboleth-authenticate') ? config('shibboleth.authenticated') : $route;
 
         if (config('jwtauth') === true) {
             $route .= $this->tokenizeRedirect($user, ['auth_type' => 'idp']);
