@@ -87,38 +87,38 @@ class ShibbolethController extends Controller
             $map[$local] = $this->getServerVariable($server);
         }
 
+        $user = null;
+
         if (empty($map[config('shibboleth.identifier', 'email')])) {
-            return abort(403, 'Unauthorized');
-        }
+            $entitlementString = $this->getServerVariable(config('shibboleth.entitlement'));
 
-        $entitlementString = $this->getServerVariable(config('shibboleth.entitlement'));
+            $userClass = config('auth.providers.users.model', 'App\User');
 
-        $userClass = config('auth.providers.users.model', 'App\User');
+            // Dont use Auth, just add $map to Session
+            if (config('shibboleth.use_simple_session', false)) {
+                $map[config('shibboleth.entitlement')] = $entitlementString;
+                session(['shibboleth' => $map]);
+            }
 
-        // Dont use Auth, just add $map to Session
-        if (config('shibboleth.use_simple_session', false)) {
-            $map[config('shibboleth.entitlement')] = $entitlementString;
-            session(['shibboleth' => $map]);
-        }
+            // Attempt to login with the email, if success, update the user model
+            // with data from the Shibboleth headers (if present)
+            elseif (Auth::attempt(array('email' => $map['email']), true)) {
+                $user = $userClass::where('email', '=', $map['email'])->first();
 
-        // Attempt to login with the email, if success, update the user model
-        // with data from the Shibboleth headers (if present)
-        elseif (Auth::attempt(array('email' => $map['email']), true)) {
-            $user = $userClass::where('email', '=', $map['email'])->first();
+                // Update the model as necessary
+                $user->update($map);
+            }
 
-            // Update the model as necessary
-            $user->update($map);
-        }
+            // Add user and send through auth.
+            elseif (config('shibboleth.add_new_users', true)) {
+                $map['password'] = 'shibboleth';
+                $user = $userClass::create($map);
+                Auth::login($user, true);
+            }
 
-        // Add user and send through auth.
-        elseif (config('shibboleth.add_new_users', true)) {
-            $map['password'] = 'shibboleth';
-            $user = $userClass::create($map);
-            Auth::login($user, true);
-        }
-
-        else {
-            return abort(403, 'Unauthorized');
+            else {
+                return abort(403, 'Unauthorized');
+            }
         }
 
 //        if (!config('shibboleth.use_simple_session', false) && !empty($entitlementString)) {
@@ -133,7 +133,7 @@ class ShibbolethController extends Controller
 
         $route = $route == route('shibboleth-authenticate') ? config('shibboleth.authenticated') : $route;
 
-        if (config('jwtauth') === true) {
+        if (config('jwtauth') === true && $user) {
             $route .= $this->tokenizeRedirect($user, ['auth_type' => 'idp']);
         }
 
