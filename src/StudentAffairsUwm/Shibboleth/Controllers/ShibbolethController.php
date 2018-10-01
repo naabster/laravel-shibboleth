@@ -89,7 +89,7 @@ class ShibbolethController extends Controller
 
         $user = null;
 
-        if (empty($map[config('shibboleth.identifier', 'email')])) {
+        if (!empty($map[config('shibboleth.identifier', 'email')])) {
             $entitlementString = $this->getServerVariable(config('shibboleth.entitlement'));
 
             $userClass = config('auth.providers.users.model', 'App\User');
