@@ -128,6 +128,7 @@ class ShibbolethController extends Controller
 
         $route = session('triedShibLogin', config('shibboleth.authenticated'));
         Session::forget('triedShibLogin');
+        Session::flash('shib-idp-checked', true);
 
         $route = $route == route('shibboleth-authenticate') ? config('shibboleth.authenticated') : $route;
 
