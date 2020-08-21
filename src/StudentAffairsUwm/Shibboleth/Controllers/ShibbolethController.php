@@ -160,7 +160,8 @@ class ShibbolethController extends Controller
     {
         $this->destroySession();
 
-        $target = (Input::get('return') != null) ? Input::get('return') : $this->getServerVariable('HTTP_REFERER');
+//        $target = (Input::get('return') != null) ? Input::get('return') : $this->getServerVariable('HTTP_REFERER');
+        $target = config('app.url');
         return Redirect::to($target);
     }
 
