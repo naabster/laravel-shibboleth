@@ -160,8 +160,19 @@ class ShibbolethController extends Controller
     {
         $this->destroySession();
 
+        $target = config('app.url');
         $targetInput = (Input::get('return') != null) ? Input::get('return') : $this->getServerVariable('HTTP_REFERER');
-        $target = in_array($targetInput, config('shibboleth.allowed_redirects')) ? $targetInput : config('app.url');
+
+        try {
+            $url = parse_url($targetInput);
+            if ($url && !empty($url['host'])) {
+                if (substr_compare($url['host'], config('shibboleth.allowed_redirect_host'), -strlen(config('shibboleth.allowed_redirect_host'))) === 0) {
+                    $target = $targetInput;
+                }
+            }
+        } catch (\Exception $e) {
+            //
+        }
 
         return Redirect::to($target);
     }
